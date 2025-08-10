@@ -119,9 +119,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   IMPORTANT: the UMD bundle exposes a global `supabase` object.
   Destructure createClient from it and then create a client instance.
 */
-const { createClient } = supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // DOM Elements
 const statusEl = document.getElementById('status');
 const userActions = document.getElementById('user-actions');
