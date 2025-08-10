@@ -110,469 +110,470 @@
   </div>
 
 <script>
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  /* ===== CONFIG - replace these ===== */
+  const SUPABASE_URL = 'https://sljrlvpfdgaprubfmtnu.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsanJsdnBmZGdhcHJ1YmZtdG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3NzM5MDYsImV4cCI6MjA3MDM0OTkwNn0.H-bgKSnEyU_TeUHRd18pR9nkYfeD7WkV3wkpoKazuw4';
+  /* ================================== */
 
-/* ===== CONFIG - replace these ===== */
-const SUPABASE_URL = 'https://sljrlvpfdgaprubfmtnu.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsanJsdnBmZGdhcHJ1YmZtdG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3NzM5MDYsImV4cCI6MjA3MDM0OTkwNn0.H-bgKSnEyU_TeUHRd18pR9nkYfeD7WkV3wkpoKazuw4';
-/* ================================== */
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-/*
-  IMPORTANT: the UMD bundle exposes a global `supabase` object.
-  Destructure createClient from it and then create a client instance.
-*/
+  // This is the CORRECTED line. We rename the variable to avoid the conflict.
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// DOM Elements
-const statusEl = document.getElementById('status');
-const userActions = document.getElementById('user-actions');
-const authArea = document.getElementById('auth-area');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const btnSignup = document.getElementById('btn-signup');
-const btnLogin = document.getElementById('btn-login');
-const btnSignout = document.getElementById('btn-signout');
+  /*
+    IMPORTANT: the UMD bundle exposes a global `supabase` object.
+    Destructure createClient from it and then create a client instance.
+  */
 
-const profilePanel = document.getElementById('profile-panel');
-const avatarImg = document.getElementById('avatar-img');
-const usernameInput = document.getElementById('username');
-const nicknameInput = document.getElementById('nickname');
-const btnSaveProfile = document.getElementById('btn-save-profile');
-const avatarFile = document.getElementById('avatar-file');
+  // DOM Elements
+  const statusEl = document.getElementById('status');
+  const userActions = document.getElementById('user-actions');
+  const authArea = document.getElementById('auth-area');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const btnSignup = document.getElementById('btn-signup');
+  const btnLogin = document.getElementById('btn-login');
+  const btnSignout = document.getElementById('btn-signout');
 
-const usersList = document.getElementById('users-list');
+  const profilePanel = document.getElementById('profile-panel');
+  const avatarImg = document.getElementById('avatar-img');
+  const usernameInput = document.getElementById('username');
+  const nicknameInput = document.getElementById('nickname');
+  const btnSaveProfile = document.getElementById('btn-save-profile');
+  const avatarFile = document.getElementById('avatar-file');
 
-const messagesEl = document.getElementById('messages');
-const messageInput = document.getElementById('message-input');
-const btnSend = document.getElementById('btn-send');
-const fileInput = document.getElementById('file-input');
-const filesPreview = document.getElementById('files-preview');
-const btnRefresh = document.getElementById('btn-refresh');
+  const usersList = document.getElementById('users-list');
 
-let currentUser = null;
-let profile = null;
-let stagingFiles = []; // {file, previewUrl, type}
+  const messagesEl = document.getElementById('messages');
+  const messageInput = document.getElementById('message-input');
+  const btnSend = document.getElementById('btn-send');
+  const fileInput = document.getElementById('file-input');
+  const filesPreview = document.getElementById('files-preview');
+  const btnRefresh = document.getElementById('btn-refresh');
 
-/* ---------- Auth handlers ---------- */
-btnSignup.addEventListener('click', async () => {
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
-  if (!email || !password) return alert('email & password required');
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) return alert(error.message);
-  alert('Check your email for confirmation (if enabled). Signed up!');
-});
+  let currentUser = null;
+  let profile = null;
+  let stagingFiles = []; // {file, previewUrl, type}
 
-btnLogin.addEventListener('click', async () => {
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return alert(error.message);
-  // onAuthStateChange will handle UI
-});
+  /* ---------- Auth handlers ---------- */
+  btnSignup.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    if (!email || !password) return alert('email & password required');
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) return alert(error.message);
+    alert('Check your email for confirmation (if enabled). Signed up!');
+  });
 
-btnSignout.addEventListener('click', async () => {
-  await supabase.auth.signOut();
-  window.location.reload();
-});
+  btnLogin.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) return alert(error.message);
+    // onAuthStateChange will handle UI
+  });
 
-// Track auth changes
-supabase.auth.onAuthStateChange((event, session) => {
-  if (session && session.user) {
-    currentUser = session.user;
-    initAfterAuth();
-  } else {
-    currentUser = null;
-    showSignedOut();
-  }
-});
+  btnSignout.addEventListener('click', async () => {
+    await supabaseClient.auth.signOut();
+    window.location.reload();
+  });
 
-async function showSignedOut(){
-  statusEl.textContent = 'Not signed in';
-  btnSignout.classList.add('hidden');
-  profilePanel.classList.add('hidden');
-}
-
-/* ---------- After auth setup ---------- */
-async function initAfterAuth() {
-  const user = supabase.auth.getUser().then(r=>r.data.user).catch(()=>null);
-  const u = await user;
-  if (!u) { showSignedOut(); return; }
-  currentUser = u;
-  statusEl.textContent = `Signed in: ${currentUser.email}`;
-  btnSignout.classList.remove('hidden');
-  profilePanel.classList.remove('hidden');
-
-  // Ensure profile exists (our SQL trigger handles it), but fetch or create client-side fallback
-  const { data: profileData, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', currentUser.id)
-    .single();
-
-  if (error && (error.code === 'PGRST116' || error.message && error.message.includes('No rows'))) {
-    // create one
-    await supabase.from('profiles').insert({ id: currentUser.id }).select();
-    profile = { id: currentUser.id };
-  } else {
-    profile = profileData;
-  }
-
-  renderProfile();
-  subscribeMessages();
-  fetchMessages();
-  fetchUsers();
-}
-
-/* ---------- Profile UI & logic ---------- */
-function renderProfile(){
-  if (!profile) return;
-  usernameInput.value = profile.username || '';
-  nicknameInput.value = profile.nickname || '';
-  avatarImg.src = profile.avatar_url || 'https://via.placeholder.com/64?text=AV';
-}
-
-btnSaveProfile.addEventListener('click', async () => {
-  // username uniqueness is enforced by DB unique index; handle error message.
-  const updates = {
-    id: currentUser.id,
-    username: usernameInput.value.trim() || null,
-    nickname: nicknameInput.value.trim() || null,
-    updated_at: new Date().toISOString()
-  };
-
-  // If avatar file selected, upload first
-  if (avatarFile.files && avatarFile.files[0]) {
-    const f = avatarFile.files[0];
-    const path = `${currentUser.id}/avatar_${Date.now()}_${f.name.replace(/\s+/g,'_')}`;
-    const { data: uploadData, error: upErr } = await supabase.storage
-      .from('chat-media')
-      .upload(path, f, { upsert: false, metadata: { user_id: currentUser.id, public: 'true' } });
-    if (upErr) return alert('Avatar upload error: ' + upErr.message);
-    const publicUrl = await supabase.storage.from('chat-media').getPublicUrl(path);
-    updates.avatar_url = publicUrl.data.publicUrl;
-  }
-
-  // Use upsert: returning representation may return an array
-  const { data, error } = await supabase.from('profiles').upsert(updates, { returning: 'representation' }).select();
-  if (error) {
-    alert('Save profile error: ' + error.message);
-    return;
-  }
-  profile = (data && data[0]) || profile;
-  renderProfile();
-  fetchUsers();
-});
-
-/* ---------- Users list (display only) ---------- */
-async function fetchUsers(){
-  const { data, error } = await supabase.from('profiles').select('id, username, nickname, avatar_url').order('username', { nulls: 'last' }).limit(100);
-  if (error) return console.error(error);
-  usersList.innerHTML = data.map(u => {
-    let name = u.nickname || u.username || u.id.slice(0,6);
-    let uname = u.username ? `@${u.username}` : '';
-    return `<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
-      <img src="${u.avatar_url || 'https://via.placeholder.com/40?text=U'}" style="width:32px;height:32px;border-radius:50%;object-fit:cover"/>
-      <div><div><strong>${escapeHtml(name)}</strong> ${uname}</div><div class="small">${u.id}</div></div>
-    </div>`;
-  }).join('');
-}
-
-/* ---------- Messaging ---------- */
-// fetch recent messages
-async function fetchMessages() {
-  const { data, error } = await supabase
-    .from('messages')
-    .select(`id,user_id,content,created_at,updated_at,edited, profiles(username,nickname,avatar_url)`)
-    .order('created_at', { ascending: true })
-    .limit(200);
-
-  if (error) return console.error(error);
-  messagesEl.innerHTML = '';
-  for (const msg of data) {
-    appendMessage(msg);
-  }
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-// Realtime subscribe to messages table
-let messagesSubscription = null;
-function subscribeMessages(){
-  if (messagesSubscription) {
-    try { messagesSubscription.unsubscribe(); } catch(e) { /* ignore */ }
-  }
-
-  messagesSubscription = supabase
-    .channel('public:messages')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-      // join with profiles? let's fetch the profile for sender quickly
-      loadMessageById(payload.new.id);
-    })
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, payload => {
-      updateMessageInDOM(payload.new);
-    })
-    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, payload => {
-      removeMessageFromDOM(payload.old.id);
-    })
-    .subscribe();
-}
-
-// helper to fetch a single message including profile and files
-async function loadMessageById(id) {
-  const { data, error } = await supabase
-    .from('messages')
-    .select(`id,user_id,content,created_at,updated_at,edited,
-             profiles(username,nickname,avatar_url),
-             message_files(bucket_id,path,file_type,public_url)`)
-    .eq('id', id)
-    .single();
-  if (error) return console.error(error);
-  appendMessage(data);
-}
-
-function appendMessage(msg) {
-  if (!msg) return;
-  // Avoid duplicates: if exists remove then append
-  const existing = document.getElementById('msg-' + msg.id);
-  if (existing) existing.remove();
-
-  // profile might be nested under 'profiles' relationship or not; handle both
-  let profile = msg.profiles || msg.profile || null;
-  let displayName = (profile && (profile.nickname || profile.username)) || (msg.user_id ? (msg.user_id.slice(0,6)) : 'unknown');
-  let avatar = profile && profile.avatar_url ? profile.avatar_url : 'https://via.placeholder.com/48?text=U';
-  let container = document.createElement('div');
-  container.id = 'msg-' + msg.id;
-  container.className = (msg.user_id === (currentUser && currentUser.id)) ? 'my' : '';
-  container.style.display = 'flex';
-  container.style.gap = '8px';
-  container.style.alignItems = 'flex-start';
-  container.innerHTML = `
-    <img src="${avatar}" style="width:40px;height:40px;border-radius:50%;object-fit:cover"/>
-    <div style="max-width: calc(100% - 64px);">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <strong>${escapeHtml(displayName)}</strong>
-        <span class="small" style="color:#888">${new Date(msg.created_at).toLocaleString()}</span>
-        ${msg.edited ? '<span class="small" style="color:#666"> (edited)</span>' : ''}
-      </div>
-      <div class="message">${escapeHtml(msg.content || '')}</div>
-      <div class="small files-area"></div>
-    </div>
-  `;
-
-  // load attached files for the message (if included)
-  if (msg.message_files && msg.message_files.length) {
-    const filesArea = container.querySelector('.files-area');
-    for (const f of msg.message_files) {
-      const fEl = document.createElement('div');
-      fEl.style.marginTop = '6px';
-      const url = f.public_url || supabase.storage.from(f.bucket_id).getPublicUrl(f.path).data.publicUrl;
-      if (f.file_type && f.file_type.startsWith('image/')) {
-        fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}">
-          <img src="${escapeAttr(url)}" style="max-width:200px;border-radius:6px"/>
-        </a>`;
-      } else if (f.file_type && f.file_type.startsWith('video/')) {
-        fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}">
-          <video src="${escapeAttr(url)}" controls style="max-width:240px;border-radius:6px"></video>
-        </a>`;
-      } else {
-        fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}">${escapeHtml(f.path)}</a>`;
-      }
-      filesArea.appendChild(fEl);
+  // Track auth changes
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session && session.user) {
+      currentUser = session.user;
+      initAfterAuth();
+    } else {
+      currentUser = null;
+      showSignedOut();
     }
-  } else {
-    // try to fetch message_files if not present
-    fetchFilesForMessage(msg.id).then(files=>{
-      if (!files || !files.length) return;
+  });
+
+  async function showSignedOut(){
+    statusEl.textContent = 'Not signed in';
+    btnSignout.classList.add('hidden');
+    profilePanel.classList.add('hidden');
+  }
+
+  /* ---------- After auth setup ---------- */
+  async function initAfterAuth() {
+    const user = supabaseClient.auth.getUser().then(r=>r.data.user).catch(()=>null);
+    const u = await user;
+    if (!u) { showSignedOut(); return; }
+    currentUser = u;
+    statusEl.textContent = `Signed in: ${currentUser.email}`;
+    btnSignout.classList.remove('hidden');
+    profilePanel.classList.remove('hidden');
+
+    // Ensure profile exists (our SQL trigger handles it), but fetch or create client-side fallback
+    const { data: profileData, error } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('id', currentUser.id)
+      .single();
+
+    if (error && (error.code === 'PGRST116' || error.message && error.message.includes('No rows'))) {
+      // create one
+      await supabaseClient.from('profiles').insert({ id: currentUser.id }).select();
+      profile = { id: currentUser.id };
+    } else {
+      profile = profileData;
+    }
+
+    renderProfile();
+    subscribeMessages();
+    fetchMessages();
+    fetchUsers();
+  }
+
+  /* ---------- Profile UI & logic ---------- */
+  function renderProfile(){
+    if (!profile) return;
+    usernameInput.value = profile.username || '';
+    nicknameInput.value = profile.nickname || '';
+    avatarImg.src = profile.avatar_url || 'https://via.placeholder.com/64?text=AV';
+  }
+
+  btnSaveProfile.addEventListener('click', async () => {
+    // username uniqueness is enforced by DB unique index; handle error message.
+    const updates = {
+      id: currentUser.id,
+      username: usernameInput.value.trim() || null,
+      nickname: nicknameInput.value.trim() || null,
+      updated_at: new Date().toISOString()
+    };
+
+    // If avatar file selected, upload first
+    if (avatarFile.files && avatarFile.files[0]) {
+      const f = avatarFile.files[0];
+      const path = `${currentUser.id}/avatar_${Date.now()}_${f.name.replace(/\s+/g,'_')}`;
+      const { data: uploadData, error: upErr } = await supabaseClient.storage
+        .from('chat-media')
+        .upload(path, f, { upsert: false, metadata: { user_id: currentUser.id, public: 'true' } });
+      if (upErr) return alert('Avatar upload error: ' + upErr.message);
+      const publicUrl = await supabaseClient.storage.from('chat-media').getPublicUrl(path);
+      updates.avatar_url = publicUrl.data.publicUrl;
+    }
+
+    // Use upsert: returning representation may return an array
+    const { data, error } = await supabaseClient.from('profiles').upsert(updates, { returning: 'representation' }).select();
+    if (error) {
+      alert('Save profile error: ' + error.message);
+      return;
+    }
+    profile = (data && data[0]) || profile;
+    renderProfile();
+    fetchUsers();
+  });
+
+  /* ---------- Users list (display only) ---------- */
+  async function fetchUsers(){
+    const { data, error } = await supabaseClient.from('profiles').select('id, username, nickname, avatar_url').order('username', { nulls: 'last' }).limit(100);
+    if (error) return console.error(error);
+    usersList.innerHTML = data.map(u => {
+      let name = u.nickname || u.username || u.id.slice(0,6);
+      let uname = u.username ? `@${u.username}` : '';
+      return `<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+        <img src="${u.avatar_url || 'https://via.placeholder.com/40?text=U'}" style="width:32px;height:32px;border-radius:50%;object-fit:cover"/>
+        <div><div><strong>${escapeHtml(name)}</strong> ${uname}</div><div class="small">${u.id}</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---------- Messaging ---------- */
+  // fetch recent messages
+  async function fetchMessages() {
+    const { data, error } = await supabaseClient
+      .from('messages')
+      .select(`id,user_id,content,created_at,updated_at,edited, profiles(username,nickname,avatar_url)`)
+      .order('created_at', { ascending: true })
+      .limit(200);
+
+    if (error) return console.error(error);
+    messagesEl.innerHTML = '';
+    for (const msg of data) {
+      appendMessage(msg);
+    }
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  // Realtime subscribe to messages table
+  let messagesSubscription = null;
+  function subscribeMessages(){
+    if (messagesSubscription) {
+      try { messagesSubscription.unsubscribe(); } catch(e) { /* ignore */ }
+    }
+
+    messagesSubscription = supabaseClient
+      .channel('public:messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+        // join with profiles? let's fetch the profile for sender quickly
+        loadMessageById(payload.new.id);
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, payload => {
+        updateMessageInDOM(payload.new);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, payload => {
+        removeMessageFromDOM(payload.old.id);
+      })
+      .subscribe();
+  }
+
+  // helper to fetch a single message including profile and files
+  async function loadMessageById(id) {
+    const { data, error } = await supabaseClient
+      .from('messages')
+      .select(`id,user_id,content,created_at,updated_at,edited,
+               profiles(username,nickname,avatar_url),
+               message_files(bucket_id,path,file_type,public_url)`)
+      .eq('id', id)
+      .single();
+    if (error) return console.error(error);
+    appendMessage(data);
+  }
+
+  function appendMessage(msg) {
+    if (!msg) return;
+    // Avoid duplicates: if exists remove then append
+    const existing = document.getElementById('msg-' + msg.id);
+    if (existing) existing.remove();
+
+    // profile might be nested under 'profiles' relationship or not; handle both
+    let profile = msg.profiles || msg.profile || null;
+    let displayName = (profile && (profile.nickname || profile.username)) || (msg.user_id ? (msg.user_id.slice(0,6)) : 'unknown');
+    let avatar = profile && profile.avatar_url ? profile.avatar_url : 'https://via.placeholder.com/48?text=U';
+    let container = document.createElement('div');
+    container.id = 'msg-' + msg.id;
+    container.className = (msg.user_id === (currentUser && currentUser.id)) ? 'my' : '';
+    container.style.display = 'flex';
+    container.style.gap = '8px';
+    container.style.alignItems = 'flex-start';
+    container.innerHTML = `
+      <img src="${avatar}" style="width:40px;height:40px;border-radius:50%;object-fit:cover"/>
+      <div style="max-width: calc(100% - 64px);">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <strong>${escapeHtml(displayName)}</strong>
+          <span class="small" style="color:#888">${new Date(msg.created_at).toLocaleString()}</span>
+          ${msg.edited ? '<span class="small" style="color:#666"> (edited)</span>' : ''}
+        </div>
+        <div class="message">${escapeHtml(msg.content || '')}</div>
+        <div class="small files-area"></div>
+      </div>
+    `;
+
+    // load attached files for the message (if included)
+    if (msg.message_files && msg.message_files.length) {
       const filesArea = container.querySelector('.files-area');
-      for (const f of files) {
+      for (const f of msg.message_files) {
         const fEl = document.createElement('div');
         fEl.style.marginTop = '6px';
-        const url = f.public_url || supabase.storage.from(f.bucket_id).getPublicUrl(f.path).data.publicUrl;
+        const url = f.public_url || supabaseClient.storage.from(f.bucket_id).getPublicUrl(f.path).data.publicUrl;
         if (f.file_type && f.file_type.startsWith('image/')) {
-          fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}"><img src="${escapeAttr(url)}" style="max-width:200px;border-radius:6px"/></a>`;
+          fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}">
+            <img src="${escapeAttr(url)}" style="max-width:200px;border-radius:6px"/>
+          </a>`;
         } else if (f.file_type && f.file_type.startsWith('video/')) {
-          fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}"><video src="${escapeAttr(url)}" controls style="max-width:240px;border-radius:6px"></video></a>`;
+          fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}">
+            <video src="${escapeAttr(url)}" controls style="max-width:240px;border-radius:6px"></video>
+          </a>`;
         } else {
           fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}">${escapeHtml(f.path)}</a>`;
         }
         filesArea.appendChild(fEl);
       }
-    });
-  }
-
-  // owner controls (edit / delete)
-  if (currentUser && msg.user_id === currentUser.id) {
-    const controls = document.createElement('div');
-    controls.style.marginTop = '6px';
-    controls.innerHTML = `<button class="btn edit" style="margin-right:6px">Edit</button>
-                          <button class="btn danger delete">Delete</button>`;
-    container.querySelector('div > div').appendChild(controls);
-
-    controls.querySelector('.edit').addEventListener('click', ()=>enterEdit(msg));
-    controls.querySelector('.delete').addEventListener('click', ()=>deleteMessage(msg.id));
-  }
-
-  messagesEl.appendChild(container);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-async function fetchFilesForMessage(messageId) {
-  const { data, error } = await supabase.from('message_files').select('*').eq('message_id', messageId);
-  if (error) return console.error(error);
-  return data;
-}
-
-function updateMessageInDOM(newMsg){
-  // replace DOM
-  removeMessageFromDOM(newMsg.id);
-  loadMessageById(newMsg.id);
-}
-
-function removeMessageFromDOM(id){
-  const el = document.getElementById('msg-'+id);
-  if (el) el.remove();
-}
-
-/* ---------- Send message flow (including file uploads) ---------- */
-fileInput.addEventListener('change', (e) => {
-  const files = Array.from(e.target.files || []);
-  for (const f of files) {
-    const url = URL.createObjectURL(f);
-    const preview = { file: f, previewUrl: url, type: f.type };
-    stagingFiles.push(preview);
-  }
-  renderStaging();
-});
-
-function renderStaging(){
-  filesPreview.innerHTML = '';
-  stagingFiles.forEach((s, idx) => {
-    const div = document.createElement('div');
-    div.className = 'preview';
-    if (s.type.startsWith('image/')) {
-      div.innerHTML = `<img src="${s.previewUrl}"/><div class="remove">X</div>`;
-    } else if (s.type.startsWith('video/')) {
-      div.innerHTML = `<video src="${s.previewUrl}" muted></video><div class="remove">X</div>`;
     } else {
-      div.innerHTML = `<div style="padding:6px">${escapeHtml(s.file.name)}</div><div class="remove">X</div>`;
+      // try to fetch message_files if not present
+      fetchFilesForMessage(msg.id).then(files=>{
+        if (!files || !files.length) return;
+        const filesArea = container.querySelector('.files-area');
+        for (const f of files) {
+          const fEl = document.createElement('div');
+          fEl.style.marginTop = '6px';
+          const url = f.public_url || supabaseClient.storage.from(f.bucket_id).getPublicUrl(f.path).data.publicUrl;
+          if (f.file_type && f.file_type.startsWith('image/')) {
+            fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}"><img src="${escapeAttr(url)}" style="max-width:200px;border-radius:6px"/></a>`;
+          } else if (f.file_type && f.file_type.startsWith('video/')) {
+            fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}"><video src="${escapeAttr(url)}" controls style="max-width:240px;border-radius:6px"></video></a>`;
+          } else {
+            fEl.innerHTML = `<a target="_blank" href="${escapeAttr(url)}">${escapeHtml(f.path)}</a>`;
+          }
+          filesArea.appendChild(fEl);
+        }
+      });
     }
-    div.querySelector('.remove').addEventListener('click', ()=>{
-      URL.revokeObjectURL(s.previewUrl);
-      stagingFiles.splice(idx,1);
-      renderStaging();
-    });
-    filesPreview.appendChild(div);
-  });
-}
 
-btnSend.addEventListener('click', async () => {
-  if (!currentUser) return alert('Sign in first');
-  const text = messageInput.value.trim();
-  // upload files first (if any)
-  const uploadedInfos = []; // {bucket_id, path, file_type, public_url}
-  for (const s of stagingFiles) {
-    // path convention: userId/messages/<timestamp>_<rand>_<filename>
-    const filename = `${Date.now()}_${Math.random().toString(36).slice(2,8)}_${s.file.name.replace(/\s+/g,'_')}`;
-    const path = `${currentUser.id}/messages/${filename}`;
-    const { data, error } = await supabase.storage.from('chat-media').upload(path, s.file, {
-      metadata: { user_id: currentUser.id, public: 'false' }
+    // owner controls (edit / delete)
+    if (currentUser && msg.user_id === currentUser.id) {
+      const controls = document.createElement('div');
+      controls.style.marginTop = '6px';
+      controls.innerHTML = `<button class="btn edit" style="margin-right:6px">Edit</button>
+                            <button class="btn danger delete">Delete</button>`;
+      container.querySelector('div > div').appendChild(controls);
+
+      controls.querySelector('.edit').addEventListener('click', ()=>enterEdit(msg));
+      controls.querySelector('.delete').addEventListener('click', ()=>deleteMessage(msg.id));
+    }
+
+    messagesEl.appendChild(container);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  async function fetchFilesForMessage(messageId) {
+    const { data, error } = await supabaseClient.from('message_files').select('*').eq('message_id', messageId);
+    if (error) return console.error(error);
+    return data;
+  }
+
+  function updateMessageInDOM(newMsg){
+    // replace DOM
+    removeMessageFromDOM(newMsg.id);
+    loadMessageById(newMsg.id);
+  }
+
+  function removeMessageFromDOM(id){
+    const el = document.getElementById('msg-'+id);
+    if (el) el.remove();
+  }
+
+  /* ---------- Send message flow (including file uploads) ---------- */
+  fileInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files || []);
+    for (const f of files) {
+      const url = URL.createObjectURL(f);
+      const preview = { file: f, previewUrl: url, type: f.type };
+      stagingFiles.push(preview);
+    }
+    renderStaging();
+  });
+
+  function renderStaging(){
+    filesPreview.innerHTML = '';
+    stagingFiles.forEach((s, idx) => {
+      const div = document.createElement('div');
+      div.className = 'preview';
+      if (s.type.startsWith('image/')) {
+        div.innerHTML = `<img src="${s.previewUrl}"/><div class="remove">X</div>`;
+      } else if (s.type.startsWith('video/')) {
+        div.innerHTML = `<video src="${s.previewUrl}" muted></video><div class="remove">X</div>`;
+      } else {
+        div.innerHTML = `<div style="padding:6px">${escapeHtml(s.file.name)}</div><div class="remove">X</div>`;
+      }
+      div.querySelector('.remove').addEventListener('click', ()=>{
+        URL.revokeObjectURL(s.previewUrl);
+        stagingFiles.splice(idx,1);
+        renderStaging();
+      });
+      filesPreview.appendChild(div);
     });
-    if (error) {
-      console.error('Upload error', error);
-      alert('Upload error: ' + error.message);
+  }
+
+  btnSend.addEventListener('click', async () => {
+    if (!currentUser) return alert('Sign in first');
+    const text = messageInput.value.trim();
+    // upload files first (if any)
+    const uploadedInfos = []; // {bucket_id, path, file_type, public_url}
+    for (const s of stagingFiles) {
+      // path convention: userId/messages/<timestamp>_<rand>_<filename>
+      const filename = `${Date.now()}_${Math.random().toString(36).slice(2,8)}_${s.file.name.replace(/\s+/g,'_')}`;
+      const path = `${currentUser.id}/messages/${filename}`;
+      const { data, error } = await supabaseClient.storage.from('chat-media').upload(path, s.file, {
+        metadata: { user_id: currentUser.id, public: 'false' }
+      });
+      if (error) {
+        console.error('Upload error', error);
+        alert('Upload error: ' + error.message);
+        return;
+      }
+      // get public (or signed) url - note: for private buckets use createSignedUrl or store path and get signed url server-side
+      const publicUrlData = supabaseClient.storage.from('chat-media').getPublicUrl(path);
+      uploadedInfos.push({
+        bucket_id: 'chat-media',
+        path,
+        file_type: s.type,
+        public_url: publicUrlData.data ? publicUrlData.data.publicUrl : null
+      });
+    }
+
+    // Insert message
+    const { data: msgData, error: msgErr } = await supabaseClient.from('messages').insert({
+      user_id: currentUser.id,
+      content: text
+    }).select().single();
+    if (msgErr) {
+      alert('Message send failed: ' + msgErr.message);
       return;
     }
-    // get public (or signed) url - note: for private buckets use createSignedUrl or store path and get signed url server-side
-    const publicUrlData = supabase.storage.from('chat-media').getPublicUrl(path);
-    uploadedInfos.push({
-      bucket_id: 'chat-media',
-      path,
-      file_type: s.type,
-      public_url: publicUrlData.data ? publicUrlData.data.publicUrl : null
-    });
+
+    // Insert message_files metadata rows
+    for (const info of uploadedInfos) {
+      const { error: fErr } = await supabaseClient.from('message_files').insert({
+        message_id: msgData.id,
+        user_id: currentUser.id,
+        bucket_id: info.bucket_id,
+        path: info.path,
+        file_type: info.file_type,
+        public_url: info.public_url
+      });
+      if (fErr) console.error('message_files insert err', fErr);
+    }
+
+    // clear
+    messageInput.value = '';
+    stagingFiles.forEach(s=> URL.revokeObjectURL(s.previewUrl));
+    stagingFiles = [];
+    renderStaging();
+
+    // fetch newly created message and append (realtime will also handle)
+    loadMessageById(msgData.id);
+  });
+
+  /* ---------- Edit & Delete ---------- */
+  async function enterEdit(msg) {
+    // simple inline edit using prompt for now
+    const newText = prompt('Edit your message', msg.content || '');
+    if (newText === null) return; // cancelled
+    const { data, error } = await supabaseClient.from('messages').update({
+      content: newText,
+      edited: true,
+      updated_at: new Date().toISOString()
+    }).eq('id', msg.id).select().single();
+    if (error) return alert('Edit failed: ' + error.message);
+    updateMessageInDOM(data);
   }
 
-  // Insert message
-  const { data: msgData, error: msgErr } = await supabase.from('messages').insert({
-    user_id: currentUser.id,
-    content: text
-  }).select().single();
-  if (msgErr) {
-    alert('Message send failed: ' + msgErr.message);
-    return;
+  async function deleteMessage(id) {
+    if (!confirm('Delete this message?')) return;
+    const { error } = await supabaseClient.from('messages').delete().eq('id', id);
+    if (error) return alert('Delete failed: ' + error.message);
+    removeMessageFromDOM(id);
+    // message_files rows will cascade-delete because of FK with on delete cascade; you can also delete storage objects if you want.
   }
 
-  // Insert message_files metadata rows
-  for (const info of uploadedInfos) {
-    const { error: fErr } = await supabase.from('message_files').insert({
-      message_id: msgData.id,
-      user_id: currentUser.id,
-      bucket_id: info.bucket_id,
-      path: info.path,
-      file_type: info.file_type,
-      public_url: info.public_url
-    });
-    if (fErr) console.error('message_files insert err', fErr);
+  /* ---------- Helpers ---------- */
+  function escapeHtml(str) {
+    if (!str && str !== 0) return '';
+    return String(str)
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#39;');
+  }
+  function escapeAttr(str) {
+    return escapeHtml(str).replaceAll('\n',' ');
   }
 
-  // clear
-  messageInput.value = '';
-  stagingFiles.forEach(s=> URL.revokeObjectURL(s.previewUrl));
-  stagingFiles = [];
-  renderStaging();
+  /* ---------- small extra controls ---------- */
+  btnRefresh.addEventListener('click', fetchMessages);
 
-  // fetch newly created message and append (realtime will also handle)
-  loadMessageById(msgData.id);
-});
-
-/* ---------- Edit & Delete ---------- */
-async function enterEdit(msg) {
-  // simple inline edit using prompt for now
-  const newText = prompt('Edit your message', msg.content || '');
-  if (newText === null) return; // cancelled
-  const { data, error } = await supabase.from('messages').update({
-    content: newText,
-    edited: true,
-    updated_at: new Date().toISOString()
-  }).eq('id', msg.id).select().single();
-  if (error) return alert('Edit failed: ' + error.message);
-  updateMessageInDOM(data);
-}
-
-async function deleteMessage(id) {
-  if (!confirm('Delete this message?')) return;
-  const { error } = await supabase.from('messages').delete().eq('id', id);
-  if (error) return alert('Delete failed: ' + error.message);
-  removeMessageFromDOM(id);
-  // message_files rows will cascade-delete because of FK with on delete cascade; you can also delete storage objects if you want.
-}
-
-/* ---------- Helpers ---------- */
-function escapeHtml(str) {
-  if (!str && str !== 0) return '';
-  return String(str)
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'",'&#39;');
-}
-function escapeAttr(str) {
-  return escapeHtml(str).replaceAll('\n',' ');
-}
-
-/* ---------- small extra controls ---------- */
-btnRefresh.addEventListener('click', fetchMessages);
-
-/* ---------- initial check (if already logged in) ---------- */
-(async function(){
-  const { data } = await supabase.auth.getSession();
-  if (data && data.session && data.session.user) {
-    currentUser = data.session.user;
-    initAfterAuth();
-  } else {
-    showSignedOut();
-  }
-})();
+  /* ---------- initial check (if already logged in) ---------- */
+  (async function(){
+    const { data } = await supabaseClient.auth.getSession();
+    if (data && data.session && data.session.user) {
+      currentUser = data.session.user;
+      initAfterAuth();
+    } else {
+      showSignedOut();
+    }
+  })();
 </script>
 </body>
 </html>
